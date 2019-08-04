@@ -7,48 +7,111 @@ public class Main
 		try(Scanner input = new Scanner(System.in);)
 		{
 			BoardIO board = new BoardIO();
-			String[] tokens;
+			String[] commandParts;
+			String commandName;
+			String commandArgument;
 			System.out.println("\nWELLCOME TO GOOSEGAME");
 			do
 			{
-				tokens = printMenu(input);
-				switch (tokens[0])
+				commandParts = printMenu(input);
+				commandName = commandParts[0];
+				commandArgument = commandParts[1];
+				switch (commandName)
 				{
+
+					case "createBoard":
+						if (commandArgument.isBlank())
+						{
+							board.createBoard(input);
+						}
+						else
+						{
+							commandError(commandName, "\nCommand doesn't need arguments");
+						}
+					break;
+
+					case "showBoard":
+						if (commandArgument.isBlank())
+						{
+							board.showBoard();
+						}
+						else
+						{
+							commandError(commandName, "\nCommand doesn't need arguments");
+						}
+					break;
+
 					case "add player":
 						try
 						{
-							board.addPlayer(tokens[1]);
+							if (!commandArgument.isBlank())
+							{
+								board.addPlayer(commandArgument);
+							}
+							else
+							{
+								commandError(commandName, "Command needs argument");
+							}
 						}
-						catch (BoardException e)
+						catch (BoardIOException e)
 						{
-							System.out.println(e.getMessage() + "\nPlease insert command again");
+							commandError(commandName, e.getMessage());
 						}
 					break;
 
 					case "move":
 						try
 						{
-							board.movePlayer(tokens[1]);
+							if (!commandArgument.isBlank())
+							{
+								board.movePlayer(commandArgument);
+							}
+							else
+							{
+								commandError(commandName, "Command needs arguments");
+							}
 						}
-						catch (BoardException e)
+						catch (BoardIOException e)
 						{
-							System.out.println(e.getMessage() + "\nPlease insert command again");
+							commandError(commandName, e.getMessage());
 						}
 					break;
 
-					case "show":
-						board.getPlayersPosition();
+					case "showPositions":
+						if (commandArgument.isBlank())
+						{
+							board.getPlayersPosition();
+						}
+						else
+						{
+							commandError(commandName, "Command doesn't need arguments");
+						}
 					break;
 
 					case "restart":
-						board.restart();
+						if (commandArgument.isBlank())
+						{
+							board.restart();
+						}
+						else
+						{
+							commandError(commandName, "\nCommand doesn't need arguments");
+						}
 					break;
 					
 					case "exit":
-						return;
+						if (commandArgument.isBlank())
+						{
+							return;
+						}
+						else
+						{
+							commandError(commandName, "Command doesn't need arguments");
+						}
+					break;
 					
 					default:
-						System.out.println("\nUnknown command\nPlease insert command again");
+						commandError(commandName, "Unknown command");
 				}
 			} while (true);
 		} catch (Exception e) {
@@ -60,24 +123,31 @@ public class Main
 	{
 		String[] str = new String[2];
 		System.out.print("\n\nCommand menu" +
+							"\nTo create a new board (a default one already exists) write: createBoard" +
+							"\nTo show the board write: showBoard" +
 							"\nTo add a player write: add player playerName" +
 							"\nTo move with random dices write: move playerName" +
-							"\nTo move write: move playerName dice1, dice2" +
-							"\nTo know players's position write: show" +
+							"\nTo move write: move playerName dice1Value, dice2Value" +
+							"\nTo show players's position write: showPositions" +
 							"\nTo restart write: restart" +
 							"\nTo exit write: exit" +
-							"\n>> ");
+							"\n\n>> ");
 
 		str[0] = input.next();
 		str[1] = input.nextLine().strip();
 		if (str[0].equals("add"))
 		{
-			if (str[1].contains("player"))
+			if (str[1].startsWith("player"))
 			{
-				str[1] = str[1].replaceAll("player", "").stripLeading();
+				str[1] = str[1].substring("player".length()).stripLeading();
 				str[0] += " player";
 			}
 		}
 		return str;
+	}
+
+	private static void commandError(String commandName, String errorMessage)
+	{
+		System.out.println("\nERROR:" + "\nCommand " + "\"" + commandName + "\"" + ": " + errorMessage + "\nPlease insert command again");
 	}
 }
